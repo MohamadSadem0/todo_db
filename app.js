@@ -1,16 +1,17 @@
-import axios from "axios";
-
 const todoInput = document.querySelector(".todo-input");
 const todoButton = document.querySelector(".todo-button");
 const todoList = document.querySelector(".todo-list");
 const filterOption = document.querySelector(".filter-todo");
 
-document.addEventListener("DOMContentLoaded", getRemoteTodos);
 todoButton.addEventListener("click", addTodo);
-todoList.addEventListener("click", deleteCheck);
+todoList.addEventListener("click", deleteTodo);
 filterOption.addEventListener("change", filterTodo);
 
-const addTodo = async (event) => {
+document.addEventListener("DOMContentLoaded", () => {
+  getRemoteTodos(); // Call getRemoteTodos after it's defined
+});
+
+async function addTodo(event) {
   event.preventDefault();
   const todoText = todoInput.value.trim();
   if (!todoText) return;
@@ -26,18 +27,18 @@ const addTodo = async (event) => {
   } catch (error) {
     console.error("Error adding todo:", error);
   }
-};
+}
 
-const deleteTodo = async (todoId) => {
+async function deleteTodo(todoId) {
   try {
     await axios.post("backend/delete_todo.php", { id: todoId });
     document.getElementById(`todo-${todoId}`).remove();
   } catch (error) {
     console.error("Error deleting todo:", error);
   }
-};
+}
 
-const toggleTodoCompletion = async (todoId, isCompleted) => {
+async function toggleTodoCompletion(todoId, isCompleted) {
   try {
     await axios.post("backend/update_todo.php", {
       id: todoId,
@@ -48,9 +49,9 @@ const toggleTodoCompletion = async (todoId, isCompleted) => {
   } catch (error) {
     console.error("Error updating todo:", error);
   }
-};
+}
 
-const appendTodoToList = (todo) => {
+function appendTodoToList(todo) {
   const todoDiv = document.createElement("div");
   todoDiv.id = `todo-${todo.id}`;
   todoDiv.classList.add("todo");
@@ -75,9 +76,9 @@ const appendTodoToList = (todo) => {
   todoDiv.appendChild(trashButton);
 
   todoList.appendChild(todoDiv);
-};
+}
 
-const getRemoteTodos = async () => {
+async function getRemoteTodos() {
   try {
     const response = await axios.get("backend/get_todos.php");
     const todos = response.data;
@@ -85,9 +86,9 @@ const getRemoteTodos = async () => {
   } catch (error) {
     console.error("Error fetching todos:", error);
   }
-};
+}
 
-const filterTodo = () => {
+function filterTodo() {
   const todos = todoList.childNodes;
   todos.forEach((todo) => {
     switch (filterOption.value) {
@@ -106,4 +107,5 @@ const filterTodo = () => {
         break;
     }
   });
-};
+}
+
