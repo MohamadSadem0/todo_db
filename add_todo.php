@@ -1,15 +1,15 @@
 <?php
 include('connection.php');
 
-    $todoText = $_POST["todo"];
-    $user=$_GET["id"];
 
+    $todoText = $_POST["title"];
+    $user=$_POST["id"];
+    $todoId=rand(1, 1000);
 
-    $stmt = $pdo->prepare("IN");
+    $stmt = $mysqli->prepare("insert into todo () ");
     $stmt->execute(array(':title' => $todoText));
 
-    // Return the inserted todo ID and text as JSON
-    $todoId = $pdo->lastInsertId();
+    $todoId = $mysqli->lastInsertId();
     echo json_encode(array("id" => $todoId, "text" => $todoText));
 
 ?>
