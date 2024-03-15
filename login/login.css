@@ -25,7 +25,6 @@
   padding: 50px 60px 70px;
   text-align: center;
 }
-
 .form-box h1 {
   font-size: 30px;
   margin-bottom: 60px;
@@ -48,6 +47,7 @@
 .input-field {
   background-color: #4060f1;
   margin: 15px 0;
+
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -56,4 +56,12 @@
 input {
   width: 100%;
   background-color: transparent;
-…
+  bottom: 0;
+  outline: 0;
+  padding: 18px 15px;
+}
+
+.input-field i {
+  margin-left: 15px;
+  color: #fff;
+}

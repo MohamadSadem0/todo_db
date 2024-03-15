@@ -3,14 +3,13 @@ const todoButton = document.querySelector(".todo-button");
 const todoList = document.querySelector(".todo-list");
 const filterOption = document.querySelector(".filter-todo");
 
-todoButton.addEventListener("click", addTodo);
-todoList.addEventListener("click", deleteCheck);
-filterOption.addEventListener("change", filterTodo);
 let userId = 1;
+baseurl = "http://localhost/todo_db/get_all.php?user_id=1";
 
 const showAll = async () => {
   try {
-    const response = await axios.get(`todo_db/get_all.php?user_id=${userId}`);
+    const response = await axios.get(baseurl);
+    console.log(response.data);
     const tasks = response.data;
     console.log(tasks);
   } catch (error) {
@@ -25,11 +24,19 @@ const addTodo = async (event) => {
   if (!todoText) return;
 
   try {
-    const response = await axios.post("todo_db/add_todo", {
-      user_id: userId, // to be fixed when fix login
-      title: todoText,
-    });
-
+    const response = await axios.post(
+      "http://localhost/todo_db/add_todo.php?title=titlewqe&id=1",
+      {
+        "user_id": userId, // to be fixed when fix login
+        "title": todoText,
+        "is_completed":0
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const newTodo = response.data;
 
     const todoDiv = document.createElement("div");
@@ -54,9 +61,12 @@ const addTodo = async (event) => {
     todoInput.value = "";
   } catch (error) {
     console.error(error);
+    console.log(error.response.data);
   }
 };
 
+todoButton.addEventListener("click", addTodo);
+todoList.addEventListener("click", deleteCheck);
 function deleteCheck(e) {
   const item = e.target;
 
@@ -64,7 +74,8 @@ function deleteCheck(e) {
     const todo = item.parentElement;
     const taskId = userId;
 
-    axios.delete(`todo_db/delete_task/${taskId}`)
+    axios
+      .delete(`todo_db/delete_task/${taskId}`)
       .then(() => {
         todo.classList.add("slide");
 
@@ -72,7 +83,7 @@ function deleteCheck(e) {
           todo.remove();
         });
       })
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   }
 
   if (item.classList[0] === "complete-btn") {
@@ -84,23 +95,23 @@ function deleteCheck(e) {
 const getLocalTodos = async () => {
   try {
     const response = await axios.get(`todo_db/get_all?user_id=${userId}`);
-    
-    response.data.forEach(todo => {
-    });
+
+    response.data.forEach((todo) => {});
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 function removeLocalTodos(todo) {
-  const taskId = /* Get the task ID from the DOM element */;
-  
-  axios.delete(`todo_db/delete_task/${taskId}`)
+  const taskId = taskId;
+
+  axios
+    .delete(`todo_db/delete_task/${taskId}`)
     .then(() => {
       let todos = JSON.parse(localStorage.getItem("todos"));
       const todoIndex = todo.children[0].innerText;
       todos.splice(todos.indexOf(todoIndex), 1);
       localStorage.setItem("todos", JSON.stringify(todos));
     })
-    .catch(error => console.error(error));
+    .catch((error) => console.error(error));
 }
