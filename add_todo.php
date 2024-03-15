@@ -4,13 +4,16 @@ include('connection.php');
 
 $user_id = $_POST['user_id'];
 $title = $_POST['title'];
+$status=$_POST['is_completed']; 
 
-$sql = "INSERT INTO tasks (title, user_id) VALUES (?, ?)";
-$stmt = $mysqli->prepare($sql);
 
-$stmt->bind_param("si", $title, $user_id);
+$query = $mysqli->prepare("INSERT INTO tasks (title, user_id,is_completed) VALUES (?, ?, ?)");
 
-if ($stmt->execute()) {
+
+$query->bind_param("sii", $title, $user_id,$status);
+
+
+if ($query->execute()) {
     $response = array("message" => "Task created successfully");
 } else {
     $response = array("error" => "Error creating task");
