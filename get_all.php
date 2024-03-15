@@ -28,5 +28,5 @@ if (isset($_GET['user_id'])) {
     echo json_encode($response);
 }
 
-$mysqli->close();
+$mysqli->close();   
 ?>
