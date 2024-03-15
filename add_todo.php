@@ -1,27 +1,24 @@
 <?php
 include('connection.php');
 
-if (isset($_POST["title"]) && isset($_POST["id"])) {
-    $todoText = $_POST["title"];
-    $user = $_POST["id"];
-    
-    $todoId = rand(1, 1000);
 
-    $description = date("Y-m-d H:i:s");
+$user_id = $_POST['user_id'];
+$title = $_POST['title'];
 
-    $stmt = $mysqli->prepare("INSERT INTO todo (Title, Description, UserID, TodoID) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('ssii', $todoText, $description, $user, $todoId);
+$sql = "INSERT INTO tasks (title, user_id) VALUES (?, ?)";
+$stmt = $mysqli->prepare($sql);
 
-    if ($stmt->execute()) {
-        $response["status"] = "success";
-    } else {
-        $response["status"] = "error";
-        $response["message"] = $mysqli->error; // Provide error message for debugging
-    }
+$stmt->bind_param("si", $title, $user_id);
+
+if ($stmt->execute()) {
+    $response = array("message" => "Task created successfully");
 } else {
-    $response["status"] = "error";
-    $response["message"] = "Required parameters are missing";
+    $response = array("error" => "Error creating task");
 }
 
+header('Content-Type: application/json');
 echo json_encode($response);
+
+
+
 ?>
