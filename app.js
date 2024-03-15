@@ -8,7 +8,7 @@ todoList.addEventListener("click", deleteTodo);
 filterOption.addEventListener("change", filterTodo);
 
 document.addEventListener("DOMContentLoaded", () => {
-  getRemoteTodos(); // Call getRemoteTodos after it's defined
+  getRemoteTodos(); 
 });
 
 async function addTodo(event) {
