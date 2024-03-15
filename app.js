@@ -6,7 +6,7 @@ const filterOption = document.querySelector(".filter-todo");
 todoButton.addEventListener("click", addTodo);
 todoList.addEventListener("click", deleteCheck);
 filterOption.addEventListener("change", filterTodo);
-let userId = 0;
+let userId = 1;
 
 const showAll = async () => {
   try {
@@ -26,7 +26,7 @@ const addTodo = async (event) => {
 
   try {
     const response = await axios.post("todo_db/add_todo", {
-      user_id: userId, // Use the actual user ID
+      user_id: userId, // to be fixed when fix login
       title: todoText,
     });
 
@@ -62,7 +62,7 @@ function deleteCheck(e) {
 
   if (item.classList[0] === "trash-btn") {
     const todo = item.parentElement;
-    const taskId = /* Get the task ID from the DOM element */;
+    const taskId = userId;
 
     axios.delete(`todo_db/delete_task/${taskId}`)
       .then(() => {
@@ -86,7 +86,6 @@ const getLocalTodos = async () => {
     const response = await axios.get(`todo_db/get_all?user_id=${userId}`);
     
     response.data.forEach(todo => {
-      // Process each todo item
     });
   } catch (error) {
     console.error(error);
@@ -96,7 +95,7 @@ const getLocalTodos = async () => {
 function removeLocalTodos(todo) {
   const taskId = /* Get the task ID from the DOM element */;
   
-  axios.delete(`http://your-api-url/delete-task/${taskId}`)
+  axios.delete(`todo_db/delete_task/${taskId}`)
     .then(() => {
       let todos = JSON.parse(localStorage.getItem("todos"));
       const todoIndex = todo.children[0].innerText;
