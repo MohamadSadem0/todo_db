@@ -4,108 +4,104 @@ const todoList = document.querySelector(".todo-list");
 const filterOption = document.querySelector(".filter-todo");
 
 todoButton.addEventListener("click", addTodo);
-todoList.addEventListener("click", deleteTodo);
+todoList.addEventListener("click", deleteCheck);
 filterOption.addEventListener("change", filterTodo);
+let userId = 0;
 
-document.addEventListener("DOMContentLoaded", () => {
-  getRemoteTodos(); 
-});
+const showAll = async () => {
+  try {
+    const response = await axios.get(`todo_db/get_all.php?user_id=${userId}`);
+    const tasks = response.data;
+    console.log(tasks);
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+  }
+};
 
-async function addTodo(event) {
+const addTodo = async (event) => {
   event.preventDefault();
-  const todoText = todoInput.value.trim();
+
+  const todoText = todoInput.value;
   if (!todoText) return;
 
   try {
-    const response = await axios.post("backend/add_todo.php", {
-      todo: todoText,
+    const response = await axios.post("todo_db/add_todo", {
+      user_id: userId, // Use the actual user ID
+      title: todoText,
     });
+
     const newTodo = response.data;
 
-    appendTodoToList(newTodo);
+    const todoDiv = document.createElement("div");
+    todoDiv.classList.add("todo");
+
+    const newTodoElement = document.createElement("li");
+    newTodoElement.innerText = newTodo.title;
+    newTodoElement.classList.add("todo-item");
+    todoDiv.appendChild(newTodoElement);
+
+    const completedButton = document.createElement("button");
+    completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
+    completedButton.classList.add("complete-btn");
+    todoDiv.appendChild(completedButton);
+
+    const trashButton = document.createElement("button");
+    trashButton.innerHTML = '<i class="fas fa-trash"></i>';
+    trashButton.classList.add("trash-btn");
+    todoDiv.appendChild(trashButton);
+
+    todoList.appendChild(todoDiv);
     todoInput.value = "";
   } catch (error) {
-    console.error("Error adding todo:", error);
+    console.error(error);
+  }
+};
+
+function deleteCheck(e) {
+  const item = e.target;
+
+  if (item.classList[0] === "trash-btn") {
+    const todo = item.parentElement;
+    const taskId = /* Get the task ID from the DOM element */;
+
+    axios.delete(`todo_db/delete_task/${taskId}`)
+      .then(() => {
+        todo.classList.add("slide");
+
+        todo.addEventListener("transitionend", function () {
+          todo.remove();
+        });
+      })
+      .catch(error => console.error(error));
+  }
+
+  if (item.classList[0] === "complete-btn") {
+    const todo = item.parentElement;
+    todo.classList.toggle("completed");
   }
 }
 
-async function deleteTodo(todoId) {
+const getLocalTodos = async () => {
   try {
-    await axios.post("backend/delete_todo.php", { id: todoId });
-    document.getElementById(`todo-${todoId}`).remove();
-  } catch (error) {
-    console.error("Error deleting todo:", error);
-  }
-}
-
-async function toggleTodoCompletion(todoId, isCompleted) {
-  try {
-    await axios.post("backend/update_todo.php", {
-      id: todoId,
-      completed: isCompleted,
+    const response = await axios.get(`todo_db/get_all?user_id=${userId}`);
+    
+    response.data.forEach(todo => {
+      // Process each todo item
     });
-    const todoItem = document.getElementById(`todo-${todoId}`);
-    todoItem.classList.toggle("completed");
   } catch (error) {
-    console.error("Error updating todo:", error);
+    console.error(error);
   }
 }
 
-function appendTodoToList(todo) {
-  const todoDiv = document.createElement("div");
-  todoDiv.id = `todo-${todo.id}`;
-  todoDiv.classList.add("todo");
-
-  const newTodo = document.createElement("li");
-  newTodo.innerText = todo.text;
-  newTodo.classList.add("todo-item");
-  todoDiv.appendChild(newTodo);
-
-  const completedButton = document.createElement("button");
-  completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
-  completedButton.classList.add("complete-btn");
-  completedButton.addEventListener("click", () =>
-    toggleTodoCompletion(todo.id, !todo.completed)
-  );
-  todoDiv.appendChild(completedButton);
-
-  const trashButton = document.createElement("button");
-  trashButton.innerHTML = '<i class="fas fa-trash"></i>';
-  trashButton.classList.add("trash-btn");
-  trashButton.addEventListener("click", () => deleteTodo(todo.id));
-  todoDiv.appendChild(trashButton);
-
-  todoList.appendChild(todoDiv);
+function removeLocalTodos(todo) {
+  const taskId = /* Get the task ID from the DOM element */;
+  
+  axios.delete(`http://your-api-url/delete-task/${taskId}`)
+    .then(() => {
+      let todos = JSON.parse(localStorage.getItem("todos"));
+      const todoIndex = todo.children[0].innerText;
+      todos.splice(todos.indexOf(todoIndex), 1);
+      localStorage.setItem("todos", JSON.stringify(todos));
+    })
+    .catch(error => console.error(error));
 }
-
-async function getRemoteTodos() {
-  try {
-    const response = await axios.get("backend/get_todos.php");
-    const todos = response.data;
-    todos.forEach((todo) => appendTodoToList(todo));
-  } catch (error) {
-    console.error("Error fetching todos:", error);
-  }
-}
-
-function filterTodo() {
-  const todos = todoList.childNodes;
-  todos.forEach((todo) => {
-    switch (filterOption.value) {
-      case "all":
-        todo.style.display = "flex";
-        break;
-      case "completed":
-        todo.style.display = todo.classList.contains("completed")
-          ? "flex"
-          : "none";
-        break;
-      case "incomplete":
-        todo.style.display = !todo.classList.contains("completed")
-          ? "flex"
-          : "none";
-        break;
-    }
-  });
-}
-
