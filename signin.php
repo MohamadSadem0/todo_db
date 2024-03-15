@@ -5,7 +5,7 @@ $email = $_POST['email'];
 $password = $_POST['password'];
 
 $query = $mysqli->prepare('select id,email,password,name
-from users
+from user
 where email=?');
 $query->bind_param('s', $email);
 $query->execute();

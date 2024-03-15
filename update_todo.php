@@ -1,23 +1,24 @@
 <?php
 include('connection.php');
 
-// Check if the request is a POST request
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get the todo ID and completion status from the request body
-    $todoId = $_POST["id"];
-    $isCompleted = $_POST["completed"];
+if (isset($_POST['task_id']) && isset($_POST['new_title'])) {
+    $task_id = $_POST['task_id'];
+    $new_title = $_POST['new_title'];
 
-    // Perform any necessary validation
+    $update_query = $mysqli->prepare("UPDATE tasks SET title = ? WHERE id = ?");
+    $update_query->bind_param("si", $new_title, $task_id);
 
-    // Update the completion status of the todo in the database
-    $stmt = $pdo->prepare("UPDATE todo SET CompletionStatus = :completed WHERE TodoID = :id");
-    $stmt->execute(array(':completed' => $isCompleted, ':id' => $todoId));
-
-    // Return a success message
-    echo json_encode(array("message" => "Todo updated successfully."));
+    if ($update_query->execute()) {
+        $response = array("message" => "Task updated successfully");
+    } else {
+        $response = array("error" => "Error updating task");
+    }
 } else {
-    // Handle invalid requests
-    http_response_code(405); // Method Not Allowed
-    echo json_encode(array("message" => "Only POST requests are allowed."));
+    $response = array("error" => "Task ID or new title not provided");
 }
+
+header('Content-Type: application/json');
+echo json_encode($response);
+
+$mysqli->close();
 ?>

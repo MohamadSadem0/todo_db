@@ -6,22 +6,34 @@ $name = $_POST['name'];
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-$check_email = $mysqli->prepare('select email from users where email=?');
-$check_email->bind_param('s', $email);
-$check_email->execute();
-$check_email->store_result();
-$email_exists = $check_email->num_rows();
 
 
-if ($email_exists == 0) {
-    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-    $query = $mysqli->prepare('insert into users(name,password,email) values(?,?,?);');
-    $query->bind_param('sss', $name, $hashed_password, $email);
-    $query->execute();
-    $response['status'] = "success";
-    $response['message'] = "user $name was created successfully";
+$check_query = $mysqli->prepare("SELECT id FROM user WHERE email = ?");
+$check_query->bind_param("s", $email);
+$check_query->execute();
+$check_query->store_result();
+
+if ($check_query->num_rows > 0) {
+    $response = array("error" => "Email already exists");
 } else {
-    $response["status"] = "user already exists";
-    $response["message"] = "user $name wasn't created";
+    
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $insert_query = $mysqli->prepare("INSERT INTO user (name, email, password) VALUES (?, ?, ?)");
+    $insert_query->bind_param("sss", $name, $email, $hashed_password);
+
+    if ($insert_query->execute()) {
+        $response = array("message" => "User created successfully");
+    } else {
+        $response = array("error" => "Error creating user");
+    }
 }
+
+
+header('Content-Type: application/json');
 echo json_encode($response);
+
+$mysqli->close();
+
+
+
+?>
